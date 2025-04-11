@@ -9,6 +9,7 @@ import {
 } from 'react-router';
 import type { Route } from './+types/root';
 import './app.css';
+import { Navbar } from './navbar';
 
 export const links: Route.LinksFunction = () => [
     { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -49,7 +50,12 @@ export function Layout({
 }
 
 export default function App(): JSX.Element {
-    return <Outlet />;
+    return (
+        <>
+            <Navbar />
+            <Outlet />
+        </>
+    );
 }
 
 export function ErrorBoundary({
@@ -71,14 +77,17 @@ export function ErrorBoundary({
     }
 
     return (
-        <main className="pt-16 p-4 container mx-auto">
-            <h1>{message}</h1>
-            <p>{details}</p>
-            {stack && (
-                <pre className="w-full p-4 overflow-x-auto">
-                    <code>{stack}</code>
-                </pre>
-            )}
-        </main>
+        <>
+            <Navbar />
+            <main className="pt-16 p-4 container mx-auto">
+                <h1>{message}</h1>
+                <p>{details}</p>
+                {stack && (
+                    <pre className="w-full p-4 overflow-x-auto">
+                        <code>{stack}</code>
+                    </pre>
+                )}
+            </main>
+        </>
     );
 }
