@@ -3,11 +3,11 @@ import {
     isRouteErrorResponse,
     Links,
     Meta,
-    Outlet,
     Scripts,
     ScrollRestoration,
 } from 'react-router';
 import type { Route } from './+types/root';
+import { App as SiteApp } from './app';
 import './app.css';
 import { Navbar } from './navbar';
 
@@ -50,12 +50,7 @@ export function Layout({
 }
 
 export default function App(): JSX.Element {
-    return (
-        <>
-            <Navbar />
-            <Outlet />
-        </>
-    );
+    return <SiteApp />;
 }
 
 export function ErrorBoundary({

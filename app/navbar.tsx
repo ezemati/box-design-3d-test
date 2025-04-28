@@ -20,6 +20,12 @@ const items: MenuItem[] = [
         icon: <MailOutlined />,
         disabled: false,
     },
+    {
+        label: 'Canvas Test',
+        key: 'canvasTest',
+        // icon: <MailOutlined />,
+        disabled: false,
+    },
 ];
 
 export const Navbar: React.FC = () => {
