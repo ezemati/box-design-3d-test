@@ -18,23 +18,50 @@ export function FabricBoxDesigner({ boxImageUrl }: FabricBoxDesignerProps) {
         };
         canvas = new fabric.Canvas(canvasRef.current, options);
 
-        fabric.FabricImage.fromURL(boxImageUrl)
-            .then((img) => {
-                img.scaleX = canvas.width / img.width;
-                img.scaleY = canvas.height / img.height;
-                img.selectable = false;
+        const setBoxAsBackgroundImage = async () => {
+            const img = await fabric.FabricImage.fromURL(boxImageUrl);
+            // canvas.width = img.width;
+            // canvas.height = img.height;
+            img.scaleX = canvas.width / img.width;
+            img.scaleY = canvas.height / img.height;
+            img.selectable = false;
 
-                canvas.backgroundImage = img;
+            canvas.backgroundImage = img;
 
-                // const renderAll = canvas.renderAll.bind(canvas);
-                // renderAll();
-                canvas.requestRenderAll();
-            });
+            // const renderAll = canvas.renderAll.bind(canvas);
+            // renderAll();
+            canvas.requestRenderAll();
+        };
+        setBoxAsBackgroundImage();
 
         return () => {
             canvas.dispose();
         }
     }, [boxImageUrl]);
+
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            const key = e.key;
+            if (key !== "Delete") {
+                return;
+            }
+
+            const selectedObjects = canvas.getActiveObjects();
+            console.log(`Removing ${selectedObjects.length} objects...`)
+            selectedObjects.forEach((obj) => {
+                canvas.remove(obj);
+            });
+            canvas.discardActiveObject();
+            canvas.requestRenderAll();
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown);
+        };
+
+    }, []);
 
     const handleAddImageClick = () => {
         const logoImageURL = "./google-logo.png";
