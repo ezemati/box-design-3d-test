@@ -1,47 +1,93 @@
-import { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as fabric from 'fabric';
 
 export type FabricBoxDesignerProps = {
-    boxImageUrl: string;
-}
+    // boxImageUrl: string;
+    face: string;
+    faceWidthPx: number;
+    faceHeightPx: number;
 
-export function FabricBoxDesigner({ boxImageUrl }: FabricBoxDesignerProps) {
+    onChange: (jsonDesign: string) => void;
+    faceDesignJson: string;
+};
+
+function fabricBoxDesigner({
+    // boxImageUrl,
+    face,
+    faceWidthPx,
+    faceHeightPx,
+    onChange,
+    faceDesignJson,
+}: FabricBoxDesignerProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null!);
-    let canvas: fabric.Canvas;
+    const [canvas, setCanvas] = useState<fabric.Canvas>(null!);
 
     useEffect(() => {
+        console.log(`Setting up face '${face}'`);
+
         const options: Partial<fabric.CanvasOptions> = {
-            width: 600,
-            height: 400,
+            width: faceWidthPx,
+            height: faceHeightPx,
             backgroundColor: "#fff",
             selection: true,
         };
-        canvas = new fabric.Canvas(canvasRef.current, options);
+        const canvas = new fabric.Canvas(canvasRef.current, options);
+        setCanvas(canvas);
 
-        const setBoxAsBackgroundImage = async () => {
-            const img = await fabric.FabricImage.fromURL(boxImageUrl);
-            // canvas.width = img.width;
-            // canvas.height = img.height;
-            img.scaleX = canvas.width / img.width;
-            img.scaleY = canvas.height / img.height;
-            img.selectable = false;
+        if (faceDesignJson !== "") {
+            canvas.loadFromJSON(faceDesignJson).then(() => {
+                canvas.requestRenderAll();
+                console.log(`Canvas for face '${face}' loaded from JSON`)
+            });
+        } else {
+            const drawBoxFace = () => {
+                const faceRect = new fabric.Rect({
+                    height: faceHeightPx - 20,
+                    width: faceWidthPx - 20,
+                    fill: "#fcf51c",
+                    borderColor: "#000",
+                    selectable: false,
+                    left: 20 / 2,
+                    top: 20 / 2,
+                    hasControls: false,
+                });
 
-            canvas.backgroundImage = img;
+                // canvas.backgroundImage = img;
+                canvas.add(faceRect);
 
-            // const renderAll = canvas.renderAll.bind(canvas);
-            // renderAll();
-            canvas.requestRenderAll();
-        };
-        setBoxAsBackgroundImage();
+                // const renderAll = canvas.renderAll.bind(canvas);
+                // renderAll();
+                canvas.requestRenderAll();
+            };
+            drawBoxFace();
+        }
+
+        canvas.on("after:render", () => {
+            const extraProperties = [
+                "height",
+                "width",
+                "fill",
+                "borderColor",
+                "selectable",
+                "left",
+                "top",
+                "hasControls",
+            ];
+            // const newJsonDesign = canvas.toJSON(extraProperties);
+            const newJsonDesign = canvas.toObject(extraProperties);
+            onChange(JSON.stringify(newJsonDesign));
+        });
 
         return () => {
+            canvas.removeListeners();
             canvas.dispose();
         }
-    }, [boxImageUrl]);
+    }, [faceWidthPx, faceHeightPx, faceDesignJson, onChange, face]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             const key = e.key;
+            console.log({ e });
             if (key !== "Delete") {
                 return;
             }
@@ -60,28 +106,28 @@ export function FabricBoxDesigner({ boxImageUrl }: FabricBoxDesignerProps) {
         return () => {
             document.removeEventListener('keydown', handleKeyDown);
         };
+    }, [canvas]);
 
-    }, []);
-
-    const handleAddImageClick = () => {
+    const handleAddImageClick = async () => {
         const logoImageURL = "./google-logo.png";
-        fabric.FabricImage.fromURL(logoImageURL, {}, {
+        const img = await fabric.FabricImage.fromURL(logoImageURL, {}, {
             left: 150,
             top: 100,
             angle: 0,
             scaleX: 0.5,
             scaleY: 0.5,
-        }).then((img) => {
-            canvas.add(img);
-            canvas.setActiveObject(img);
-            canvas.requestRenderAll();
         });
+        canvas.add(img);
+        canvas.setActiveObject(img);
+        canvas.requestRenderAll();
     }
 
     return (
         <div>
-            <canvas ref={canvasRef} width="300" height="300" />
+            <canvas ref={canvasRef} width="100%" height="100%" />
             <button onClick={handleAddImageClick}>Add Image</button>
         </div>
     );
 };
+
+export const FabricBoxDesigner = React.memo(fabricBoxDesigner);

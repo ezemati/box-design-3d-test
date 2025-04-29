@@ -1,12 +1,10 @@
-import { FabricBoxDesigner } from "./fabric-box-designer";
+import { DesignerContainer } from "./designer-container";
 
 export type CanvasTestProps = {};
 
 export default function CanvasTest({}: CanvasTestProps) {
-    const backgroundImageURL = "./box-image.jpg";
-
     return (
-        <FabricBoxDesigner boxImageUrl={backgroundImageURL} />
+        <DesignerContainer productId="1" />
     )
 
     // return (
