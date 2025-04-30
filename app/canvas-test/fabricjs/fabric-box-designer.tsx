@@ -23,6 +23,18 @@ function fabricBoxDesigner({
     const [canvas, setCanvas] = useState<fabric.Canvas>(null!);
 
     useEffect(() => {
+        // Save design as JSON periodically
+        const interval = setInterval(() => {
+            console.log("Saving...");
+            handleSaveDesignClick();
+        }, 3000);
+
+        return () => {
+            clearInterval(interval);
+        };
+    }, [canvas]);
+
+    useEffect(() => {
         console.log(`Setting up face '${face}'`);
 
         const options: Partial<fabric.CanvasOptions> = {
@@ -67,13 +79,7 @@ function fabricBoxDesigner({
         //     handleSaveDesignClick();
         // });
 
-        // Save design as JSON every 1 second
-        const interval = setInterval(() => {
-            // handleSaveDesignClick();
-        }, 1000);
-
         return () => {
-            clearInterval(interval);
             canvas.removeListeners();
             canvas.dispose();
         }
