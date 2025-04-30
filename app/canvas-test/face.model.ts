@@ -48,3 +48,11 @@ export function getFaceDimensions(widthCm: number, heightCm: number, depthCm: nu
 export function cmToPx(cm: number): number {
     return cm * pxPerCm;
 }
+
+type FaceDesign = {
+    face: Face;
+    jsonDesign: string;
+    dataUrlTexture: string;
+}
+
+export type FaceDesigns = Record<Face, FaceDesign>;

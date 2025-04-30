@@ -1,38 +1,38 @@
 import { useCallback, useEffect, useState } from 'react';
-import { getAllFaces, getFaceDimensions, type Face, type FaceDimensions } from './face.model';
+import { getAllFaces, getFaceDimensions, type Face, type FaceDesigns, type FaceDimensions } from './face.model';
 import { produce } from "immer";
 import { FabricBoxDesigner } from './fabricjs/fabric-box-designer';
+import { BoxPreview3DWithFiberThreeReactCanvas } from './box-preview-3d';
+import { newBoxDimensions, type BoxDimensions } from './box.model';
 
 export type DesignerContainerProps = {
     productId: string;
 };
 
-type FaceDesign = {
-    face: Face;
-    jsonDesign: string;
-}
-
 export function DesignerContainer({ productId }: DesignerContainerProps) {
+    const [boxDimensions, setBoxDimensions] = useState<BoxDimensions>(() => newBoxDimensions(0, 0, 0));
     const [faceDimensions, setFaceDimensions] = useState<FaceDimensions>(() => getFaceDimensions(0, 0, 0));
 
     useEffect(() => {
         // Read box ID from route, fetch box's dimensions from API
-        const widthCm = 200;
-        const heightCm = 150;
+        const widthCm = 300;
+        const heightCm = 200;
         const depthCm = 100;
         const faceDimensions = getFaceDimensions(widthCm, heightCm, depthCm);
         setFaceDimensions(faceDimensions);
+        setBoxDimensions(newBoxDimensions(widthCm, heightCm, depthCm));
     }, [productId]);
 
     const [selectedBoxFace, setSelectedBoxFace] = useState<Face>("front");
-    const [faceDesigns, setFaceDesigns] = useState<Record<Face, FaceDesign>>(() => createInitialFaceDesignsObject());
+    const [faceDesigns, setFaceDesigns] = useState<FaceDesigns>(() => createInitialFaceDesignsObject());
 
     const [currentFaceDesign, setCurrentFaceDesign] = useState<string>("");
 
-    const handleCanvasChange = useCallback((jsonDesign: string) => {
+    const handleCanvasChange = useCallback((jsonDesign: string, dataUrlTexture: string) => {
         setFaceDesigns(
             produce((draft) => {
                 draft[selectedBoxFace].jsonDesign = jsonDesign;
+                draft[selectedBoxFace].dataUrlTexture = dataUrlTexture;
             })
         );
     }, [selectedBoxFace]);
@@ -51,43 +51,57 @@ export function DesignerContainer({ productId }: DesignerContainerProps) {
                     })
                 }
             </select>
-            <FabricBoxDesigner
-                face={selectedBoxFace}
-                faceWidthPx={faceDimensions[selectedBoxFace].faceWidthPx + 20}
-                faceHeightPx={faceDimensions[selectedBoxFace].faceHeightPx + 20}
-                faceDesignJson={currentFaceDesign}
-                onChange={handleCanvasChange}
-            />
+            <div style={{ display: "flex" }}>
+                <FabricBoxDesigner
+                    face={selectedBoxFace}
+                    faceWidthPx={faceDimensions[selectedBoxFace].faceWidthPx + 20}
+                    faceHeightPx={faceDimensions[selectedBoxFace].faceHeightPx + 20}
+                    faceDesignJson={currentFaceDesign}
+                    onChange={handleCanvasChange}
+                />
+                <BoxPreview3DWithFiberThreeReactCanvas
+                    widthCm={boxDimensions.widthCm}
+                    heightCm={boxDimensions.heightCm}
+                    depthCm={boxDimensions.depthCm}
+                    faceDesigns={faceDesigns}
+                />
+            </div>
         </div>
     );
 };
 
-function createInitialFaceDesignsObject(): Record<Face, FaceDesign> {
+function createInitialFaceDesignsObject(): FaceDesigns {
     console.log("Creating initial face designs object...");
     return {
         front: {
             face: "front",
-            jsonDesign: ""
+            jsonDesign: "",
+            dataUrlTexture: "",
         },
         back: {
             face: "back",
-            jsonDesign: ""
+            jsonDesign: "",
+            dataUrlTexture: "",
         },
         top: {
             face: "top",
-            jsonDesign: ""
+            jsonDesign: "",
+            dataUrlTexture: "",
         },
         bottom: {
             face: "bottom",
-            jsonDesign: ""
+            jsonDesign: "",
+            dataUrlTexture: "",
         },
         left: {
             face: "left",
-            jsonDesign: ""
+            jsonDesign: "",
+            dataUrlTexture: "",
         },
         right: {
             face: "right",
-            jsonDesign: ""
+            jsonDesign: "",
+            dataUrlTexture: "",
         },
     };
 }

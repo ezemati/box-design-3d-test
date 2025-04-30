@@ -7,7 +7,7 @@ export type FabricBoxDesignerProps = {
     faceWidthPx: number;
     faceHeightPx: number;
 
-    onChange: (jsonDesign: string) => void;
+    onChange: (jsonDesign: string, dataUrlTexture: string) => void;
     faceDesignJson: string;
 };
 
@@ -62,23 +62,18 @@ function fabricBoxDesigner({
             drawBoxFace();
         }
 
-        canvas.on("after:render", () => {
-            const extraProperties = [
-                "height",
-                "width",
-                "fill",
-                "borderColor",
-                "selectable",
-                "left",
-                "top",
-                "hasControls",
-            ];
-            // const newJsonDesign = canvas.toJSON(extraProperties);
-            const newJsonDesign = canvas.toObject(extraProperties);
-            onChange(JSON.stringify(newJsonDesign));
-        });
+        // Save design as JSON after every change
+        // canvas.on("after:render", () => {
+        //     handleSaveDesignClick();
+        // });
+
+        // Save design as JSON every 1 second
+        const interval = setInterval(() => {
+            // handleSaveDesignClick();
+        }, 1000);
 
         return () => {
+            clearInterval(interval);
             canvas.removeListeners();
             canvas.dispose();
         }
@@ -122,10 +117,27 @@ function fabricBoxDesigner({
         canvas.requestRenderAll();
     }
 
+    const handleSaveDesignClick = () => {
+        const extraProperties = [
+            "height",
+            "width",
+            "fill",
+            "borderColor",
+            "selectable",
+            "left",
+            "top",
+            "hasControls",
+        ];
+        const newJsonDesign = canvas.toObject(extraProperties);
+        const newDataUrlTexture = canvas.toDataURL({ format: "png", multiplier: 1 });
+        onChange(JSON.stringify(newJsonDesign), newDataUrlTexture);
+    }
+
     return (
         <div>
-            <canvas ref={canvasRef} width="100%" height="100%" />
+            <canvas ref={canvasRef} style={{ height: "100%", width: "100%" }} />
             <button onClick={handleAddImageClick}>Add Image</button>
+            <button style={{ marginLeft: "10px" }} onClick={handleSaveDesignClick}>Save</button>
         </div>
     );
 };
