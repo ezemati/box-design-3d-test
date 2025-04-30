@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { getAllFaces, getFaceDimensions, type Face, type FaceDimensions } from './face.model';
 import { produce } from "immer";
-import { FabricBoxDesigner } from './fabric-box-designer';
+import { FabricBoxDesigner } from './fabricjs/fabric-box-designer';
 
 export type DesignerContainerProps = {
     productId: string;
