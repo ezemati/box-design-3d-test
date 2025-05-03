@@ -1,0 +1,16 @@
+services:
+  app:
+    container_name: unboxing-front
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '5173:80'
+      - '5174:443'
+    environment:
+      NODE_ENV: development
+    networks:
+      - unboxing-front-network
+
+networks:
+  unboxing-front-network:
