@@ -1,42 +1,31 @@
-import React from 'react';
-import { Layout, Menu, theme } from 'antd';
+import { Layout, theme, type MenuProps } from 'antd';
+import React, { useState } from 'react';
 import { Outlet, useNavigate } from 'react-router';
+import { Navbar } from './navbar';
 
 const { Header, Content, Footer } = Layout;
-
-const items: React.ComponentProps<typeof Menu>["items"] = [
-    {
-        key: "",
-        label: "Home"
-    },
-    {
-        key: "canvasTest",
-        label: "Canvas"
-    },
-]
 
 export const App: React.FC = () => {
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
+    const [currentRoute, setCurrentRoute] = useState('');
     const navigate = useNavigate();
 
-    const menuClickHandler: React.ComponentProps<typeof Menu>["onClick"] = (e) => {
-        navigate(e.key)
-    }
+    const handleMenuItemClick: MenuProps['onClick'] = (e) => {
+        setCurrentRoute(e.key);
+        // eslint-disable-next-line @typescript-eslint/no-floating-promises
+        navigate(e.key);
+    };
 
     return (
         <Layout>
             <Header style={{ display: 'flex', alignItems: 'center' }}>
                 <div className="demo-logo">MyLogo</div>
-                <Menu
-                    theme="light"
-                    mode="horizontal"
-                    defaultSelectedKeys={['2']}
-                    items={items}
-                    style={{ flex: 1, minWidth: 0 }}
-                    onClick={menuClickHandler}
+                <Navbar
+                    currentRoute={currentRoute}
+                    onMenuItemClick={handleMenuItemClick}
                 />
             </Header>
             <Content style={{ padding: '0 48px' }}>

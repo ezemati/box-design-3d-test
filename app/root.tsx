@@ -9,7 +9,6 @@ import {
 import type { Route } from './+types/root';
 import { App as SiteApp } from './app';
 import './app.css';
-import { Navbar } from './navbar';
 
 export const links: Route.LinksFunction = () => [
     { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -73,7 +72,6 @@ export function ErrorBoundary({
 
     return (
         <>
-            <Navbar />
             <main className="pt-16 p-4 container mx-auto">
                 <h1>{message}</h1>
                 <p>{details}</p>

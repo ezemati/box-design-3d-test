@@ -1,8 +1,7 @@
-import React, { useState } from 'react';
-import { HomeOutlined, MailOutlined } from '@ant-design/icons';
+import { HomeOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Menu } from 'antd';
-import { useNavigate } from 'react-router';
+import { type JSX } from 'react';
 
 type MenuItem = Required<MenuProps>['items'][number];
 
@@ -15,12 +14,6 @@ const items: MenuItem[] = [
         disabled: false,
     },
     {
-        label: 'Welcome',
-        key: 'welcome',
-        icon: <MailOutlined />,
-        disabled: false,
-    },
-    {
         label: 'Canvas Test',
         key: 'canvasTest',
         // icon: <MailOutlined />,
@@ -28,15 +21,23 @@ const items: MenuItem[] = [
     },
 ];
 
-export const Navbar: React.FC = () => {
-    const [current, setCurrent] = useState('');
-    const navigate = useNavigate();
+export interface NavbarProps {
+    currentRoute: string;
+    onMenuItemClick: MenuProps['onClick'];
+}
 
-    const onClick: MenuProps['onClick'] = (e) => {
-        console.log('click ', e);
-        setCurrent(e.key);
-        navigate(e.key);
-    };
-
-    return <Menu onClick={onClick} selectedKeys={[current]} mode="horizontal" items={items} />;
-};
+export function Navbar({
+    currentRoute,
+    onMenuItemClick,
+}: NavbarProps): JSX.Element {
+    return (
+        <Menu
+            onClick={onMenuItemClick}
+            selectedKeys={[currentRoute]}
+            mode="horizontal"
+            items={items}
+            style={{ flex: 1, minWidth: 0 }}
+            theme="light"
+        />
+    );
+}
