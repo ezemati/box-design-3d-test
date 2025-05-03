@@ -27,6 +27,10 @@ function FabricBoxDesignerPrivate({
 }: FabricBoxDesignerProps): JSX.Element {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const canvasRef = useRef<HTMLCanvasElement>(null!);
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const fileInputRef = useRef<HTMLInputElement>(null!);
+
     const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
 
     const handleSaveDesignClick = useCallback(() => {
@@ -152,33 +156,70 @@ function FabricBoxDesignerPrivate({
         };
     }, [canvas]);
 
-    const handleAddImageClick = async (): Promise<void> => {
-        if (!canvas) {
+    const handleAddImageClick = (
+        e: React.ChangeEvent<HTMLInputElement>,
+    ): void => {
+        if (!canvas || !e.target.files) {
             return;
         }
 
+        const file = e.target.files[0];
+        const fileReader = new FileReader();
+        fileReader.onload = async (loadEvent): Promise<void> => {
+            // eslint-disable-next-line @typescript-eslint/no-base-to-string
+            const imageDataUrl = loadEvent.target?.result?.toString();
+            if (imageDataUrl) {
+                console.log({ imageDataUrl });
+                await addImageToCanvas(imageDataUrl, canvas);
+
+                // Reset file input to allow uploading the same file again if needed
+                fileInputRef.current.value = '';
+            }
+        };
+        fileReader.onerror = (error): void => {
+            console.error('Error reading file:', error);
+            alert('Failed to read image file.');
+        };
+        fileReader.readAsDataURL(file);
+    };
+
+    const handleAddGoogleImageClick = async (): Promise<void> => {
+        if (!canvas) {
+            return;
+        }
         const logoImageURL = './google-logo.png';
-        const img = await fabric.FabricImage.fromURL(
-            logoImageURL,
-            {},
-            {
-                left: 150,
-                top: 100,
-                angle: 0,
-                scaleX: 0.5,
-                scaleY: 0.5,
-            },
-        );
-        canvas.add(img);
-        canvas.setActiveObject(img);
-        canvas.requestRenderAll();
+        await addImageToCanvas(logoImageURL, canvas);
     };
 
     return (
         <div>
             <canvas ref={canvasRef} style={{ height: '100%', width: '100%' }} />
-            {/* eslint-disable-next-line @typescript-eslint/no-misused-promises */}
-            <button onClick={handleAddImageClick}>Add Image</button>
+
+            {/* Hidden file input */}
+            <input
+                type="file"
+                accept="image/png, image/jpeg, image/svg+xml" // Allow common image types
+                ref={fileInputRef}
+                onChange={handleAddImageClick}
+                style={{ display: 'none' }}
+            />
+
+            <button
+                onClick={() => {
+                    fileInputRef.current.click();
+                }}
+            >
+                Add Image
+            </button>
+
+            <button
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                onClick={handleAddGoogleImageClick}
+                style={{ marginLeft: '10px' }}
+            >
+                Add Google Image
+            </button>
+
             <button
                 style={{ marginLeft: '10px' }}
                 onClick={handleSaveDesignClick}
@@ -190,3 +231,23 @@ function FabricBoxDesignerPrivate({
 }
 
 export const FabricBoxDesigner = React.memo(FabricBoxDesignerPrivate);
+
+async function addImageToCanvas(
+    logoImageURL: string,
+    canvas: fabric.Canvas,
+): Promise<void> {
+    const img = await fabric.FabricImage.fromURL(
+        logoImageURL,
+        {},
+        {
+            left: 150,
+            top: 100,
+            angle: 0,
+            scaleX: 0.5,
+            scaleY: 0.5,
+        },
+    );
+    canvas.add(img);
+    canvas.setActiveObject(img);
+    canvas.requestRenderAll();
+}
