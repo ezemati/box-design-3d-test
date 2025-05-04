@@ -15,7 +15,7 @@ const items: MenuItem[] = [
     },
     {
         label: 'Canvas Test',
-        key: 'canvasTest',
+        key: 'canvasTest/1313',
         // icon: <MailOutlined />,
         disabled: false,
     },

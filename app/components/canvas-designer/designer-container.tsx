@@ -1,15 +1,20 @@
+import {
+    getBoxDimensions,
+    getInitialBoxDimensions,
+} from '@/features/canvas/models/box';
+import { getAllFaces, type Face } from '@/features/canvas/models/face';
+import {
+    getInitialFaceDesigns,
+    type FaceDesigns,
+} from '@/features/canvas/models/face-design';
+import {
+    getFaceDimensions,
+    getInitialFaceDimensions,
+} from '@/features/canvas/models/face-dimensions';
 import { produce } from 'immer';
 import { useCallback, useEffect, useState, type JSX } from 'react';
-import { BoxPreview3DWithFiberThreeReactCanvas } from './box-preview-3d';
-import { newBoxDimensions, type BoxDimensions } from './box.model';
-import { FabricBoxDesigner } from './fabricjs/fabric-box-designer';
-import {
-    getAllFaces,
-    getFaceDimensions,
-    type Face,
-    type FaceDesigns,
-    type FaceDimensions,
-} from './face.model';
+import { FabricBoxDesigner } from '../fabricjs/fabric-box-designer';
+import { BoxPreview3DWithFiberThreeReactCanvas } from '../threejs/box-preview-3d';
 
 export interface DesignerContainerProps {
     productId: string;
@@ -18,11 +23,11 @@ export interface DesignerContainerProps {
 export function DesignerContainer({
     productId,
 }: DesignerContainerProps): JSX.Element {
-    const [boxDimensions, setBoxDimensions] = useState<BoxDimensions>(() =>
-        newBoxDimensions(0, 0, 0),
+    const [boxDimensions, setBoxDimensions] = useState(() =>
+        getInitialBoxDimensions(),
     );
-    const [faceDimensions, setFaceDimensions] = useState<FaceDimensions>(() =>
-        getFaceDimensions(0, 0, 0),
+    const [faceDimensions, setFaceDimensions] = useState(() =>
+        getInitialFaceDimensions(),
     );
 
     useEffect(() => {
@@ -32,12 +37,12 @@ export function DesignerContainer({
         const depthCm = 100;
         const faceDimensions = getFaceDimensions(widthCm, heightCm, depthCm);
         setFaceDimensions(faceDimensions);
-        setBoxDimensions(newBoxDimensions(widthCm, heightCm, depthCm));
+        setBoxDimensions(getBoxDimensions(widthCm, heightCm, depthCm));
     }, [productId]);
 
     const [selectedBoxFace, setSelectedBoxFace] = useState<Face>('front');
     const [faceDesigns, setFaceDesigns] = useState<FaceDesigns>(() =>
-        createInitialFaceDesignsObject(),
+        getInitialFaceDesigns(),
     );
 
     const [currentFaceDesign, setCurrentFaceDesign] = useState<string>('');
@@ -97,40 +102,4 @@ export function DesignerContainer({
             </div>
         </div>
     );
-}
-
-function createInitialFaceDesignsObject(): FaceDesigns {
-    console.log('Creating initial face designs object...');
-    return {
-        front: {
-            face: 'front',
-            jsonDesign: '',
-            dataUrlTexture: '',
-        },
-        back: {
-            face: 'back',
-            jsonDesign: '',
-            dataUrlTexture: '',
-        },
-        top: {
-            face: 'top',
-            jsonDesign: '',
-            dataUrlTexture: '',
-        },
-        bottom: {
-            face: 'bottom',
-            jsonDesign: '',
-            dataUrlTexture: '',
-        },
-        left: {
-            face: 'left',
-            jsonDesign: '',
-            dataUrlTexture: '',
-        },
-        right: {
-            face: 'right',
-            jsonDesign: '',
-            dataUrlTexture: '',
-        },
-    };
 }

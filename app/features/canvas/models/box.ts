@@ -4,7 +4,11 @@ export interface BoxDimensions {
     depthCm: number;
 }
 
-export function newBoxDimensions(
+export function getInitialBoxDimensions(): BoxDimensions {
+    return getBoxDimensions(0, 0, 0);
+}
+
+export function getBoxDimensions(
     widthCm: number,
     heightCm: number,
     depthCm: number,

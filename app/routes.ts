@@ -1,10 +1,6 @@
-import {
-    type RouteConfig,
-    index,
-    route
-} from '@react-router/dev/routes';
+import { type RouteConfig, index, route } from '@react-router/dev/routes';
 
 export default [
     index('home/home.tsx'),
-    route("canvasTest", "./canvas-test/canvas-test.tsx"),
+    route('canvasTest/:boxId', './pages/canvas-test.tsx'),
 ] satisfies RouteConfig;

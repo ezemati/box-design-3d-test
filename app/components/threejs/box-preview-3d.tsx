@@ -1,10 +1,11 @@
 /* eslint-disable react/no-unknown-property */
+import type { Face } from '@/features/canvas/models/face';
+import type { FaceDesigns } from '@/features/canvas/models/face-design';
 import { OrbitControls, useTexture } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import React, { useRef, type JSX } from 'react';
 import * as THREE from 'three';
-import type { Face, FaceDesigns } from './face.model';
-import { faceToThreeJsIndex as getThreeJsIndexForFace } from './threejs/helpers';
+import { faceToThreeJsIndex as getThreeJsIndexForFace } from './helpers';
 
 export interface BoxPreview3DProps {
     faceDesigns: FaceDesigns;

@@ -35,6 +35,15 @@ export default tseslint.config(
         rules: {
             '@typescript-eslint/explicit-function-return-type': 'error',
             '@typescript-eslint/explicit-member-accessibility': 'error',
+            '@typescript-eslint/no-restricted-imports': [
+                'error',
+                {
+                    name: 'react-redux',
+                    importNames: ['useSelector', 'useDispatch'],
+                    message:
+                        'Use typed hooks `useAppDispatch` and `useAppSelector` instead.',
+                },
+            ],
         },
         languageOptions: {
             parserOptions: {

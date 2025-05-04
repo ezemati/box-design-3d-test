@@ -1,8 +1,4 @@
-export type Face = 'top' | 'bottom' | 'front' | 'back' | 'left' | 'right';
-
-export function getAllFaces(): Face[] {
-    return ['front', 'back', 'top', 'bottom', 'left', 'right'];
-}
+import type { Face } from './face';
 
 export interface FaceDimension {
     faceWidthPx: number;
@@ -13,6 +9,10 @@ export type FaceDimensions = Record<Face, FaceDimension>;
 
 // const pxPerCm = 10 as const;
 const pxPerCm = 3 as const;
+
+export function getInitialFaceDimensions(): FaceDimensions {
+    return getFaceDimensions(0, 0, 0);
+}
 
 export function getFaceDimensions(
     widthCm: number,
@@ -50,11 +50,3 @@ export function getFaceDimensions(
 export function cmToPx(cm: number): number {
     return cm * pxPerCm;
 }
-
-interface FaceDesign {
-    face: Face;
-    jsonDesign: string;
-    dataUrlTexture: string;
-}
-
-export type FaceDesigns = Record<Face, FaceDesign>;
