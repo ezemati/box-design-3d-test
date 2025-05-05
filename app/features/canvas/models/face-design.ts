@@ -10,35 +10,19 @@ export type FaceDesigns = Record<Face, FaceDesign>;
 
 export function getInitialFaceDesigns(): FaceDesigns {
     return {
-        front: {
-            face: 'front',
-            jsonDesign: '',
-            dataUrlTexture: '',
-        },
-        back: {
-            face: 'back',
-            jsonDesign: '',
-            dataUrlTexture: '',
-        },
-        top: {
-            face: 'top',
-            jsonDesign: '',
-            dataUrlTexture: '',
-        },
-        bottom: {
-            face: 'bottom',
-            jsonDesign: '',
-            dataUrlTexture: '',
-        },
-        left: {
-            face: 'left',
-            jsonDesign: '',
-            dataUrlTexture: '',
-        },
-        right: {
-            face: 'right',
-            jsonDesign: '',
-            dataUrlTexture: '',
-        },
+        front: getInitialFaceDesign('front'),
+        back: getInitialFaceDesign('back'),
+        top: getInitialFaceDesign('top'),
+        bottom: getInitialFaceDesign('bottom'),
+        left: getInitialFaceDesign('left'),
+        right: getInitialFaceDesign('right'),
+    };
+}
+
+export function getInitialFaceDesign(face: Face): FaceDesign {
+    return {
+        face: face,
+        jsonDesign: '',
+        dataUrlTexture: '',
     };
 }

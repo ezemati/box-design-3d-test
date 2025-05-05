@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unknown-property */
 import type { Face } from '@/features/canvas/models/face';
-import type { FaceDesigns } from '@/features/canvas/models/face-design';
+import { useStore } from '@/store/store';
 import { OrbitControls, useTexture } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import React, { useRef, type JSX } from 'react';
@@ -8,14 +8,12 @@ import * as THREE from 'three';
 import { faceToThreeJsIndex as getThreeJsIndexForFace } from './helpers';
 
 export interface BoxPreview3DProps {
-    faceDesigns: FaceDesigns;
     widthCm: number;
     heightCm: number;
     depthCm: number;
 }
 
 function BoxPreview3DWithFiberThreeReactCanvasPrivate({
-    faceDesigns,
     widthCm,
     heightCm,
     depthCm,
@@ -46,7 +44,6 @@ function BoxPreview3DWithFiberThreeReactCanvasPrivate({
                     widthCm={widthCm}
                     heightCm={heightCm}
                     depthCm={depthCm}
-                    faceDesigns={faceDesigns}
                 />
 
                 <OrbitControls />
@@ -60,7 +57,6 @@ export const BoxPreview3DWithFiberThreeReactCanvas = React.memo(
 );
 
 function BoxPreview3DMesh({
-    faceDesigns,
     widthCm,
     heightCm,
     depthCm,
@@ -81,7 +77,6 @@ function BoxPreview3DMesh({
                 widthCm={widthCm}
                 heightCm={heightCm}
                 depthCm={depthCm}
-                faceDesigns={faceDesigns}
             />
         </mesh>
     );
@@ -91,8 +86,9 @@ function BoxPreview3DBox({
     widthCm,
     heightCm,
     depthCm,
-    faceDesigns,
 }: BoxPreview3DProps): JSX.Element {
+    const faceDesigns = useStore((state) => state.faceDesigns);
+
     const meshSides = (Object.keys(faceDesigns) as Face[]).map((face) => {
         const threeJsIndex = getThreeJsIndexForFace(face);
         if (faceDesigns[face].dataUrlTexture !== '') {

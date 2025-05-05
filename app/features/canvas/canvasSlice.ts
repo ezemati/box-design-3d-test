@@ -1,81 +1,88 @@
-import type { RootState } from '@/store/store';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { createSlice } from '@reduxjs/toolkit';
-import {
-    getBoxDimensions,
-    getInitialBoxDimensions,
-    type BoxDimensions,
-} from './models/box';
-import type { Face } from './models/face';
-import { getInitialFaceDesigns, type FaceDesigns } from './models/face-design';
-import {
-    getFaceDimensions,
-    getInitialFaceDimensions,
-    type FaceDimensions,
-} from './models/face-dimensions';
+// import type { PayloadAction } from '@reduxjs/toolkit';
+// import { createSlice } from '@reduxjs/toolkit';
+// import * as fabric from 'fabric';
+// import {
+//     getBoxDimensions,
+//     getInitialBoxDimensions,
+//     type BoxDimensions,
+// } from './models/box';
+// import type { Face } from './models/face';
+// import { getInitialFaceDesigns, type FaceDesigns } from './models/face-design';
+// import {
+//     getFaceDimensions,
+//     getInitialFaceDimensions,
+//     type FaceDimensions,
+// } from './models/face-dimensions';
 
-export interface CanvasState {
-    boxDimensions: BoxDimensions;
-    currentFace: Face;
-    faceDesigns: FaceDesigns;
-    faceDimensions: FaceDimensions;
-}
+// export const canvasSlice = createSlice({
+//     reducers: {
+//         changeFace: (state, action: PayloadAction<Face>) => {
+//             state.currentFace = action.payload;
+//         },
+//         loadBoxDimensions: (
+//             state,
+//             action: PayloadAction<{
+//                 widthCm: number;
+//                 heightCm: number;
+//                 depthCm: number;
+//             }>,
+//         ) => {
+//             const { widthCm, heightCm, depthCm } = action.payload;
+//             state.boxDimensions = getBoxDimensions(widthCm, heightCm, depthCm);
+//             state.faceDimensions = getFaceDimensions(
+//                 widthCm,
+//                 heightCm,
+//                 depthCm,
+//             );
+//         },
+//         setCanvasInstance: (
+//             state,
+//             action: PayloadAction<fabric.Canvas | null>,
+//         ) => {
+//             return {
+//                 ...state,
+//                 canvas: action.payload,
+//             };
+//         },
+//         saveCanvasDesign: (state) => {
+//             const { canvas, currentFace } = state;
 
-const initialState: CanvasState = {
-    boxDimensions: getInitialBoxDimensions(),
-    currentFace: 'top',
-    faceDesigns: getInitialFaceDesigns(),
-    faceDimensions: getInitialFaceDimensions(),
-};
+//             if (!canvas) {
+//                 return;
+//             }
 
-export const canvasSlice = createSlice({
-    name: 'canvas',
-    initialState,
-    reducers: {
-        changeFace: (state, action: PayloadAction<Face>) => {
-            state.currentFace = action.payload;
-        },
-        loadBoxDimensions: (
-            state,
-            action: PayloadAction<{
-                widthCm: number;
-                heightCm: number;
-                depthCm: number;
-            }>,
-        ) => {
-            const { widthCm, heightCm, depthCm } = action.payload;
-            state.boxDimensions = getBoxDimensions(widthCm, heightCm, depthCm);
-            state.faceDimensions = getFaceDimensions(
-                widthCm,
-                heightCm,
-                depthCm,
-            );
-        },
-        saveFaceDesignAsJson: (state, action: PayloadAction<string>) => {
-            const currentFace = state.currentFace;
-            state.faceDesigns[currentFace].jsonDesign = action.payload;
-        },
-        saveFaceDesignAsUrlTexture: (state, action: PayloadAction<string>) => {
-            const currentFace = state.currentFace;
-            state.faceDesigns[currentFace].dataUrlTexture = action.payload;
-        },
-    },
-});
+//             const extraProperties = [
+//                 'height',
+//                 'width',
+//                 'fill',
+//                 'borderColor',
+//                 'selectable',
+//                 'left',
+//                 'top',
+//                 'hasControls',
+//             ];
+//             const newJsonDesign = canvas.toObject(extraProperties) as unknown;
+//             state.faceDesigns[currentFace].jsonDesign =
+//                 JSON.stringify(newJsonDesign);
 
-export const {
-    changeFace,
-    loadBoxDimensions,
-    saveFaceDesignAsJson,
-    saveFaceDesignAsUrlTexture,
-} = canvasSlice.actions;
+//             const newDataUrlTexture = canvas.toDataURL({
+//                 format: 'png',
+//                 multiplier: 1,
+//             });
+//             state.faceDesigns[currentFace].dataUrlTexture = newDataUrlTexture;
+//         },
+//         setBoldText: (state, action: PayloadAction<boolean>) => {
 
-export const canvasReducer = canvasSlice.reducer;
+//         },
+//     },
+// });
 
-export const selectCurrentFace = (state: RootState): Face =>
-    state.canvas.currentFace;
+// export const {
+//     changeFace,
+//     loadBoxDimensions,
+//     saveCanvasDesign,
+//     setBoldText,
+//     setCanvasInstance,
+// } = canvasSlice.actions;
 
-export const selectBoxDimensions = (state: RootState): BoxDimensions =>
-    state.canvas.boxDimensions;
-
-export const selectFaceDesigns = (state: RootState): FaceDesigns =>
-    state.canvas.faceDesigns;
+// export const canvasReducer = canvasSlice.reducer;

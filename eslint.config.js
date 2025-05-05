@@ -67,6 +67,7 @@ export default tseslint.config(
         './build/*',
         './node_modules/*',
         './package-lock.json',
+        './app/entry.server.tsx',
     ]),
     {
         files: ['**/*.json'],
