@@ -1,4 +1,5 @@
 import type { JSX } from 'react';
+import { Provider } from 'react-redux';
 import {
     isRouteErrorResponse,
     Links,
@@ -9,6 +10,7 @@ import {
 import type { Route } from './+types/root';
 import { App as SiteApp } from './app';
 import './app.css';
+import { store } from './store/store';
 
 export const links: Route.LinksFunction = () => [
     { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
@@ -49,7 +51,11 @@ export function Layout({
 }
 
 export default function App(): JSX.Element {
-    return <SiteApp />;
+    return (
+        <Provider store={store}>
+            <SiteApp />
+        </Provider>
+    );
 }
 
 export function ErrorBoundary({

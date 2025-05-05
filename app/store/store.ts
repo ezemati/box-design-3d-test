@@ -6,6 +6,13 @@ const rootReducer = combineReducers({ canvas: canvasReducer });
 
 export const store = configureStore({
     reducer: rootReducer,
+    middleware: (getDefaultMiddleware) =>
+        getDefaultMiddleware({
+            serializableCheck: {
+                ignoredActions: ['canvas/setCanvasInstance'],
+                ignoredPaths: ['canvas.canvas'],
+            },
+        }),
 });
 
 export type AppStore = typeof store;

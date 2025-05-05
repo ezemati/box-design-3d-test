@@ -1,6 +1,6 @@
-import type { RootState } from '@/store/store';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
+import * as fabric from 'fabric';
 import {
     getBoxDimensions,
     getInitialBoxDimensions,
@@ -16,6 +16,7 @@ import {
 
 export interface CanvasState {
     boxDimensions: BoxDimensions;
+    canvas: fabric.Canvas | null;
     currentFace: Face;
     faceDesigns: FaceDesigns;
     faceDimensions: FaceDimensions;
@@ -23,7 +24,8 @@ export interface CanvasState {
 
 const initialState: CanvasState = {
     boxDimensions: getInitialBoxDimensions(),
-    currentFace: 'top',
+    canvas: null,
+    currentFace: 'front',
     faceDesigns: getInitialFaceDesigns(),
     faceDimensions: getInitialFaceDimensions(),
 };
@@ -51,13 +53,56 @@ export const canvasSlice = createSlice({
                 depthCm,
             );
         },
-        saveFaceDesignAsJson: (state, action: PayloadAction<string>) => {
-            const currentFace = state.currentFace;
-            state.faceDesigns[currentFace].jsonDesign = action.payload;
+        setCanvasInstance: (
+            state,
+            action: PayloadAction<fabric.Canvas | null>,
+        ) => {
+            return {
+                ...state,
+                canvas: action.payload,
+            };
         },
-        saveFaceDesignAsUrlTexture: (state, action: PayloadAction<string>) => {
-            const currentFace = state.currentFace;
-            state.faceDesigns[currentFace].dataUrlTexture = action.payload;
+        saveCanvasDesign: (state) => {
+            const { canvas, currentFace } = state;
+
+            if (!canvas) {
+                return;
+            }
+
+            const extraProperties = [
+                'height',
+                'width',
+                'fill',
+                'borderColor',
+                'selectable',
+                'left',
+                'top',
+                'hasControls',
+            ];
+            const newJsonDesign = canvas.toObject(extraProperties) as unknown;
+            state.faceDesigns[currentFace].jsonDesign =
+                JSON.stringify(newJsonDesign);
+
+            const newDataUrlTexture = canvas.toDataURL({
+                format: 'png',
+                multiplier: 1,
+            });
+            state.faceDesigns[currentFace].dataUrlTexture = newDataUrlTexture;
+        },
+        setBoldText: (state, action: PayloadAction<boolean>) => {
+            const { canvas } = state;
+
+            if (!canvas) {
+                return { ...state };
+            }
+
+            canvas
+                .getActiveObjects()
+                .filter((obj) => obj.isType('IText'))
+                .map((obj) => obj as fabric.IText)
+                .forEach((obj) => {
+                    obj.fontWeight = action.payload ? 'bold' : 'normal';
+                });
         },
     },
 });
@@ -65,17 +110,9 @@ export const canvasSlice = createSlice({
 export const {
     changeFace,
     loadBoxDimensions,
-    saveFaceDesignAsJson,
-    saveFaceDesignAsUrlTexture,
+    saveCanvasDesign,
+    setBoldText,
+    setCanvasInstance,
 } = canvasSlice.actions;
 
 export const canvasReducer = canvasSlice.reducer;
-
-export const selectCurrentFace = (state: RootState): Face =>
-    state.canvas.currentFace;
-
-export const selectBoxDimensions = (state: RootState): BoxDimensions =>
-    state.canvas.boxDimensions;
-
-export const selectFaceDesigns = (state: RootState): FaceDesigns =>
-    state.canvas.faceDesigns;

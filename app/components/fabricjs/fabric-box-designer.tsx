@@ -1,29 +1,19 @@
+import {
+    saveCanvasDesign,
+    setCanvasInstance,
+} from '@/features/canvas/canvasSlice';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import * as fabric from 'fabric';
-import React, {
-    useCallback,
-    useEffect,
-    useRef,
-    useState,
-    type JSX,
-} from 'react';
+import React, { useCallback, useEffect, useRef, type JSX } from 'react';
 
 export interface FabricBoxDesignerProps {
-    // boxImageUrl: string;
-    face: string;
     faceWidthPx: number;
     faceHeightPx: number;
-
-    onChange: (jsonDesign: string, dataUrlTexture: string) => void;
-    faceDesignJson: string;
 }
 
 function FabricBoxDesignerPrivate({
-    // boxImageUrl,
-    face,
     faceWidthPx,
     faceHeightPx,
-    onChange,
-    faceDesignJson,
 }: FabricBoxDesignerProps): JSX.Element {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const canvasRef = useRef<HTMLCanvasElement>(null!);
@@ -31,46 +21,31 @@ function FabricBoxDesignerPrivate({
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const fileInputRef = useRef<HTMLInputElement>(null!);
 
-    const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
+    const dispatch = useAppDispatch();
+    const selectedFace = useAppSelector((state) => state.canvas.currentFace);
+    const faceDesigns = useAppSelector((state) => state.canvas.faceDesigns);
+    const canvas = useAppSelector((state) => state.canvas.canvas);
 
     const handleSaveDesignClick = useCallback(() => {
-        const extraProperties = [
-            'height',
-            'width',
-            'fill',
-            'borderColor',
-            'selectable',
-            'left',
-            'top',
-            'hasControls',
-        ];
-
-        if (!canvas) {
-            return;
-        }
-
-        const newJsonDesign = canvas.toObject(extraProperties) as unknown;
-        const newDataUrlTexture = canvas.toDataURL({
-            format: 'png',
-            multiplier: 1,
-        });
-        onChange(JSON.stringify(newJsonDesign), newDataUrlTexture);
-    }, [canvas, onChange]);
+        dispatch(saveCanvasDesign());
+    }, [dispatch]);
 
     useEffect(() => {
         // Save design as JSON periodically
         const interval = setInterval(() => {
-            console.log('Saving...');
-            handleSaveDesignClick();
+            // console.log('Saving...');
+            // handleSaveDesignClick();
         }, 3000);
 
         return (): void => {
             clearInterval(interval);
         };
-    }, [canvas, handleSaveDesignClick]);
+    }, [handleSaveDesignClick]);
 
     useEffect(() => {
-        console.log(`Setting up face '${face}'`);
+        if (canvas) {
+            return;
+        }
 
         const options: Partial<fabric.CanvasOptions> = {
             width: faceWidthPx,
@@ -78,14 +53,32 @@ function FabricBoxDesignerPrivate({
             backgroundColor: '#fff',
             selection: true,
         };
-        const canvas = new fabric.Canvas(canvasRef.current, options);
-        setCanvas(canvas);
+        const newCanvas = new fabric.Canvas(canvasRef.current, options);
+        dispatch(setCanvasInstance(newCanvas));
 
-        if (faceDesignJson !== '') {
+        return (): void => {
+            // eslint-disable-next-line @typescript-eslint/no-floating-promises
+            newCanvas.dispose();
+
+            setCanvasInstance(null);
+        };
+    }, [canvas, dispatch, faceHeightPx, faceWidthPx]);
+
+    useEffect(() => {
+        if (!canvas) {
+            return;
+        }
+
+        console.log(`Setting up canvas for face '${selectedFace}'`);
+
+        const currentFaceDesignJson = faceDesigns[selectedFace].jsonDesign;
+        if (currentFaceDesignJson !== '') {
             const loadDesignFromJson = async (): Promise<void> => {
-                await canvas.loadFromJSON(faceDesignJson);
+                await canvas.loadFromJSON(currentFaceDesignJson);
                 canvas.requestRenderAll();
-                console.log(`Canvas for face '${face}' loaded from JSON`);
+                console.log(
+                    `Canvas for face '${selectedFace}' loaded from JSON`,
+                );
             };
 
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -109,22 +102,48 @@ function FabricBoxDesignerPrivate({
                 // const renderAll = canvas.renderAll.bind(canvas);
                 // renderAll();
                 canvas.requestRenderAll();
+
+                console.log(
+                    `Canvas for face '${selectedFace}' created from scratch`,
+                );
+                dispatch(saveCanvasDesign());
             };
             drawBoxFace();
         }
+    }, [
+        canvas,
+        dispatch,
+        faceDesigns,
+        faceHeightPx,
+        faceWidthPx,
+        selectedFace,
+    ]);
 
-        // Save design as JSON after every change
-        // canvas.on("after:render", () => {
-        //     handleSaveDesignClick();
-        // });
+    useEffect(() => {
+        if (!canvas) {
+            return;
+        }
+
+        const eventsToRerender: (keyof fabric.CanvasEvents)[] = [
+            'object:added',
+            'object:modified',
+            'object:removed',
+        ];
+
+        const disposeFunctions = eventsToRerender.map((event) => {
+            const dispose = canvas.on(event, () => {
+                console.log(event);
+                // dispatch(saveCanvasDesign());
+            });
+            return dispose;
+        });
 
         return (): void => {
-            canvas.removeListeners();
-
-            // eslint-disable-next-line @typescript-eslint/no-floating-promises
-            canvas.dispose();
+            disposeFunctions.forEach((dispose) => {
+                dispose();
+            });
         };
-    }, [face, faceDesignJson, faceHeightPx, faceWidthPx]);
+    }, [canvas, dispatch]);
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent): void => {
@@ -133,7 +152,6 @@ function FabricBoxDesignerPrivate({
             }
 
             const key = e.key;
-            console.log({ e });
             if (key !== 'Delete') {
                 return;
             }
@@ -169,7 +187,6 @@ function FabricBoxDesignerPrivate({
             // eslint-disable-next-line @typescript-eslint/no-base-to-string
             const imageDataUrl = loadEvent.target?.result?.toString();
             if (imageDataUrl) {
-                console.log({ imageDataUrl });
                 await addImageToCanvas(imageDataUrl, canvas);
 
                 // Reset file input to allow uploading the same file again if needed
@@ -187,8 +204,20 @@ function FabricBoxDesignerPrivate({
         if (!canvas) {
             return;
         }
-        const logoImageURL = './google-logo.png';
+        const logoImageURL = '../google-logo.png';
         await addImageToCanvas(logoImageURL, canvas);
+    };
+
+    const handleAddTextClick = (): void => {
+        if (!canvas) {
+            return;
+        }
+
+        const iText = new fabric.IText('Double click to edit!', {
+            fontSize: 12,
+            selectable: true,
+        });
+        canvas.add(iText);
     };
 
     return (
@@ -218,6 +247,10 @@ function FabricBoxDesignerPrivate({
                 style={{ marginLeft: '10px' }}
             >
                 Add Google Image
+            </button>
+
+            <button onClick={handleAddTextClick} style={{ marginLeft: '10px' }}>
+                Add Text
             </button>
 
             <button
