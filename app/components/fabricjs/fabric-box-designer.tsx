@@ -42,6 +42,7 @@ function FabricBoxDesignerPrivate({
     ] = useSetBoldItalicUnderlineButtonClickHandlers();
 
     useEffect(() => {
+        console.log(`Creating canvas for face ${currentFace}`);
         const options: Partial<fabric.CanvasOptions> = {
             width: faceWidthPx,
             height: faceHeightPx,
@@ -56,7 +57,7 @@ function FabricBoxDesignerPrivate({
             // eslint-disable-next-line @typescript-eslint/no-floating-promises
             newCanvas.dispose();
         };
-    }, [faceHeightPx, faceWidthPx]);
+    }, [currentFace, faceHeightPx, faceWidthPx]);
 
     const handleSaveDesignClick = (): void => {
         if (canvas) {
@@ -98,7 +99,7 @@ function FabricBoxDesignerPrivate({
     }, [canvas, currentFace, saveCanvasDesign]);
 
     useEffect(() => {
-        if (!canvas) {
+        if (!canvas || canvas.disposed) {
             return;
         }
 
@@ -155,7 +156,7 @@ function FabricBoxDesignerPrivate({
     ]);
 
     useEffect(() => {
-        if (!canvas) {
+        if (!canvas || canvas.disposed) {
             return;
         }
 
@@ -181,7 +182,7 @@ function FabricBoxDesignerPrivate({
     }, [canvas, currentFace, saveCanvasDesign]);
 
     useEffect(() => {
-        if (!canvas) {
+        if (!canvas || canvas.disposed) {
             return;
         }
 
@@ -210,7 +211,7 @@ function FabricBoxDesignerPrivate({
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent): void => {
-            if (!canvas) {
+            if (!canvas || canvas.disposed) {
                 return;
             }
 
