@@ -1,21 +1,21 @@
-import { useStore } from '@/store/store';
+import { ActionIcon, Group } from '@mantine/core';
+import { IconBold, IconItalic, IconUnderline } from '@tabler/icons-react';
 import * as fabric from 'fabric';
 import { useEffect, useState, type JSX } from 'react';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface ControlPanelProps {}
+export interface ControlPanelProps {
+    activeObjects: fabric.FabricObject[];
+    onBoldClick: (setBold: boolean) => void;
+    onItalicClick: (setItalic: boolean) => void;
+    onUnderlineClick: (setUnderline: boolean) => void;
+}
 
-// eslint-disable-next-line no-empty-pattern
-export function ControlPanel({}: ControlPanelProps): JSX.Element {
-    const activeObjects = useStore((state) => state.activeObjects);
-    const boldClickHandler = useStore((state) => state.boldButtonClickHandler);
-    const italicClickHandler = useStore(
-        (state) => state.italicButtonClickHandler,
-    );
-    const underlineClickHandler = useStore(
-        (state) => state.underlineButtonClickHandler,
-    );
-
+export function ControlPanel({
+    activeObjects,
+    onBoldClick,
+    onItalicClick,
+    onUnderlineClick,
+}: ControlPanelProps): JSX.Element {
     const [showBoldAsClicked, setShowBoldAsClicked] = useState(false);
     const [showItalicAsClicked, setShowItalicAsClicked] = useState(false);
     const [showUnderlineAsClicked, setShowUnderlineAsClicked] = useState(false);
@@ -42,49 +42,52 @@ export function ControlPanel({}: ControlPanelProps): JSX.Element {
     }, [activeObjects]);
 
     const handleBoldButtonClick = (): void => {
-        boldClickHandler(!showBoldAsClicked);
         setShowBoldAsClicked((showAsClicked) => !showAsClicked);
+        onBoldClick(!showBoldAsClicked);
     };
 
     const handleItalicButtonClick = (): void => {
-        italicClickHandler(!showItalicAsClicked);
         setShowItalicAsClicked((showAsClicked) => !showAsClicked);
+        onItalicClick(!showItalicAsClicked);
     };
 
     const handleUnderlineButtonClick = (): void => {
-        underlineClickHandler(!showUnderlineAsClicked);
         setShowUnderlineAsClicked((showAsClicked) => !showAsClicked);
+        onUnderlineClick(!showUnderlineAsClicked);
     };
 
     return (
-        <div style={{ display: 'flex' }}>
-            <button
-                style={{
-                    backgroundColor: showBoldAsClicked ? 'gray' : 'white',
-                    flexGrow: 1,
-                }}
-                onClick={handleBoldButtonClick}
-            >
-                Bold
-            </button>
-            <button
-                style={{
-                    backgroundColor: showItalicAsClicked ? 'gray' : 'white',
-                    flexGrow: 1,
-                }}
-                onClick={handleItalicButtonClick}
-            >
-                Italic
-            </button>
-            <button
-                style={{
-                    backgroundColor: showUnderlineAsClicked ? 'gray' : 'white',
-                    flexGrow: 1,
-                }}
-                onClick={handleUnderlineButtonClick}
-            >
-                Underline
-            </button>
-        </div>
+        <Group
+            justify="center"
+            style={(theme) => ({
+                border: `1px solid ${theme.colors.gray[6]}`,
+                borderRadius: theme.radius.md,
+            })}
+            py={3}
+        >
+            <ActionIcon.Group>
+                <ActionIcon
+                    variant={showBoldAsClicked ? 'filled' : 'default'}
+                    onClick={handleBoldButtonClick}
+                >
+                    {/* <IconPhoto size={20} stroke={1.5} /> */}
+                    <IconBold stroke={2} />
+                </ActionIcon>
+                <ActionIcon
+                    variant={showItalicAsClicked ? 'filled' : 'default'}
+                    onClick={handleItalicButtonClick}
+                >
+                    {/* <IconSettings size={20} stroke={1.5} /> */}
+                    <IconItalic stroke={2} />
+                </ActionIcon>
+                <ActionIcon
+                    variant={showUnderlineAsClicked ? 'filled' : 'default'}
+                    onClick={handleUnderlineButtonClick}
+                >
+                    {/* <IconHeart size={20} stroke={1.5} /> */}
+                    <IconUnderline stroke={2} />
+                </ActionIcon>
+            </ActionIcon.Group>
+        </Group>
     );
 }

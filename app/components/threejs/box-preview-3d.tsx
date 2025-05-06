@@ -1,6 +1,7 @@
 /* eslint-disable react/no-unknown-property */
 import type { Face } from '@/features/canvas/models/face';
-import { useStore } from '@/store/store';
+import type { FaceDesigns } from '@/features/canvas/models/face-design';
+import { Center } from '@mantine/core';
 import { OrbitControls, useTexture } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 import React, { useRef, type JSX } from 'react';
@@ -8,12 +9,14 @@ import * as THREE from 'three';
 import { faceToThreeJsIndex as getThreeJsIndexForFace } from './helpers';
 
 export interface BoxPreview3DProps {
+    faceDesigns: FaceDesigns;
     widthCm: number;
     heightCm: number;
     depthCm: number;
 }
 
 function BoxPreview3DWithFiberThreeReactCanvasPrivate({
+    faceDesigns,
     widthCm,
     heightCm,
     depthCm,
@@ -23,7 +26,7 @@ function BoxPreview3DWithFiberThreeReactCanvasPrivate({
     // }
 
     return (
-        <div>
+        <Center h={'80vh'}>
             <Canvas>
                 <color attach="background" args={['#f5efe6']} />
                 <ambientLight intensity={Math.PI / 2} />
@@ -41,6 +44,7 @@ function BoxPreview3DWithFiberThreeReactCanvasPrivate({
                 />
 
                 <BoxPreview3DMesh
+                    faceDesigns={faceDesigns}
                     widthCm={widthCm}
                     heightCm={heightCm}
                     depthCm={depthCm}
@@ -48,7 +52,7 @@ function BoxPreview3DWithFiberThreeReactCanvasPrivate({
 
                 <OrbitControls />
             </Canvas>
-        </div>
+        </Center>
     );
 }
 
@@ -57,6 +61,7 @@ export const BoxPreview3DWithFiberThreeReactCanvas = React.memo(
 );
 
 function BoxPreview3DMesh({
+    faceDesigns,
     widthCm,
     heightCm,
     depthCm,
@@ -74,6 +79,7 @@ function BoxPreview3DMesh({
     return (
         <mesh position={[0, 0, 0]} ref={meshRef}>
             <BoxPreview3DBox
+                faceDesigns={faceDesigns}
                 widthCm={widthCm}
                 heightCm={heightCm}
                 depthCm={depthCm}
@@ -83,12 +89,11 @@ function BoxPreview3DMesh({
 }
 
 function BoxPreview3DBox({
+    faceDesigns,
     widthCm,
     heightCm,
     depthCm,
 }: BoxPreview3DProps): JSX.Element {
-    const faceDesigns = useStore((state) => state.faceDesigns);
-
     const meshSides = (Object.keys(faceDesigns) as Face[]).map((face) => {
         const threeJsIndex = getThreeJsIndexForFace(face);
         if (faceDesigns[face].dataUrlTexture !== '') {

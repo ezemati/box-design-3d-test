@@ -1,9 +1,14 @@
-import { getAllFaces, type Face } from '@/features/canvas/models/face';
-import { useStore } from '@/store/store';
-import { useEffect, type JSX } from 'react';
+import { getBoxDimensions } from '@/features/canvas/models/box';
+import { getFaceDimensions } from '@/features/canvas/models/face-dimensions';
+import { Flex, Stack } from '@mantine/core';
+import { useEffect, useRef, type JSX } from 'react';
+import { CanvasActions } from '../control-panel/canvas-actions';
 import { ControlPanel } from '../control-panel/control-panel';
-import { FabricBoxDesigner } from '../fabricjs/fabric-box-designer';
 import { BoxPreview3DWithFiberThreeReactCanvas } from '../threejs/box-preview-3d';
+import { useCanvasActionsHandlers } from './canvas-action-handlers-hook';
+import { useCanvasFabricEffects } from './canvas-effects-hook';
+import { useCanvasFabricState } from './canvas-state-hook';
+import { useControlPanelHandlers } from './control-panel-handlers-hook';
 
 export interface DesignerContainerProps {
     productId: string;
@@ -12,12 +17,37 @@ export interface DesignerContainerProps {
 export function DesignerContainer({
     productId,
 }: DesignerContainerProps): JSX.Element {
-    const boxDimensions = useStore((state) => state.boxDimensions);
-    const faceDimensions = useStore((state) => state.faceDimensions);
-    const selectedFace = useStore((state) => state.currentFace);
+    const [
+        canvasInstance,
+        setCanvasInstance,
+        boxDimensions,
+        setBoxDimensions,
+        faceDimensions,
+        setFaceDimensions,
+        faceDesigns,
+        setFaceDesigns,
+        selectedFace,
+        setSelectedFace,
+        currentFaceDesignJson,
+        setCurrentFaceDesignJson,
+        activeObjects,
+        setActiveObjects,
+    ] = useCanvasFabricState();
 
-    const loadBoxDimensions = useStore((state) => state.loadBoxDimensions);
-    const changeFace = useStore((state) => state.changeFace);
+    const [
+        handleFaceChange,
+        handleAddText,
+        handleAddImage,
+        handleAddGoogleImage,
+        handleSaveCanvas,
+    ] = useCanvasActionsHandlers(
+        canvasInstance,
+        faceDesigns,
+        selectedFace,
+        setSelectedFace,
+        setCurrentFaceDesignJson,
+        setFaceDesigns,
+    );
 
     useEffect(() => {
         // Read box ID from route, fetch box's dimensions from API
@@ -29,48 +59,72 @@ export function DesignerContainer({
             `Using dimensions (${widthCm.toString()}, ${heightCm.toString()}, ${depthCm.toString()}) for product with Id ${productId}`,
         );
 
-        loadBoxDimensions(widthCm, heightCm, depthCm);
-    }, [loadBoxDimensions, productId]);
+        setBoxDimensions(getBoxDimensions(widthCm, heightCm, depthCm));
+        setFaceDimensions(getFaceDimensions(widthCm, heightCm, depthCm));
+    }, [productId, setBoxDimensions, setFaceDimensions]);
 
-    const handleFaceChange = (selectedFace: Face): void => {
-        changeFace(selectedFace);
-    };
+    const canvasRef = useRef<HTMLCanvasElement>(null);
+    useCanvasFabricEffects(
+        canvasRef.current,
+        canvasInstance,
+        selectedFace,
+        currentFaceDesignJson,
+        faceDimensions[selectedFace].faceWidthPx + 20,
+        faceDimensions[selectedFace].faceHeightPx + 20,
+        setActiveObjects,
+        setCanvasInstance,
+        handleSaveCanvas,
+    );
+
+    const [handleBoldClick, handleItalicClick, handleUnderlineClick] =
+        useControlPanelHandlers(canvasInstance);
 
     return (
-        <div>
-            <select
-                value={selectedFace}
-                id="selectedFace"
-                onChange={(e) => {
-                    handleFaceChange(e.target.value as Face);
-                }}
-            >
-                {getAllFaces().map((face) => {
-                    return (
-                        <option key={face} value={face}>
-                            {face}
-                        </option>
-                    );
-                })}
-            </select>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <ControlPanel />
-                <div style={{ display: 'flex', flexDirection: 'row' }}>
-                    <FabricBoxDesigner
-                        faceWidthPx={
-                            faceDimensions[selectedFace].faceWidthPx + 20
+        <Flex
+            mih={50}
+            gap="md"
+            justify="space-between"
+            align="flex-start"
+            direction="row"
+            wrap="wrap"
+        >
+            <CanvasActions
+                selectedFace={selectedFace}
+                onFaceChange={handleFaceChange}
+                onAddTextClick={handleAddText}
+                onAddImageClick={handleAddImage}
+                // eslint-disable-next-line @typescript-eslint/no-misused-promises
+                onAddGoogleImageClick={handleAddGoogleImage}
+                onSaveClick={handleSaveCanvas}
+            />
+
+            <Stack>
+                <ControlPanel
+                    activeObjects={activeObjects}
+                    onBoldClick={handleBoldClick}
+                    onItalicClick={handleItalicClick}
+                    onUnderlineClick={handleUnderlineClick}
+                />
+                <canvas
+                    ref={canvasRef}
+                    style={{ height: '100%', width: '100%' }}
+                />
+                {/* <FabricBoxDesigner
+                    currentFaceDesign={currentFaceDesignJson}
+                    faceWidthPx={faceDimensions[selectedFace].faceWidthPx + 20}
+                    faceHeightPx={
+                        faceDimensions[selectedFace].faceHeightPx + 20
                         }
-                        faceHeightPx={
-                            faceDimensions[selectedFace].faceHeightPx + 20
-                        }
-                    />
-                    <BoxPreview3DWithFiberThreeReactCanvas
-                        widthCm={boxDimensions.widthCm}
-                        heightCm={boxDimensions.heightCm}
-                        depthCm={boxDimensions.depthCm}
-                    />
-                </div>
-            </div>
-        </div>
+                        onCanvasCreation={setFabricCanvas}
+                        /> */}
+            </Stack>
+
+            <BoxPreview3DWithFiberThreeReactCanvas
+                faceDesigns={faceDesigns}
+                widthCm={boxDimensions.widthCm}
+                heightCm={boxDimensions.heightCm}
+                depthCm={boxDimensions.depthCm}
+            />
+        </Flex>
     );
 }
