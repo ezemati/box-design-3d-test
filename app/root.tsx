@@ -1,3 +1,9 @@
+import {
+    ColorSchemeScript,
+    mantineHtmlProps,
+    MantineProvider,
+} from '@mantine/core';
+import '@mantine/core/styles.css';
 import type { JSX } from 'react';
 import {
     isRouteErrorResponse,
@@ -29,18 +35,19 @@ export function Layout({
     children: React.ReactNode;
 }): JSX.Element {
     return (
-        <html lang="en">
+        <html lang="en" {...mantineHtmlProps}>
             <head>
                 <meta charSet="utf-8" />
                 <meta
                     name="viewport"
                     content="width=device-width, initial-scale=1"
                 />
+                <ColorSchemeScript />
                 <Meta />
                 <Links />
             </head>
             <body>
-                {children}
+                <MantineProvider>{children}</MantineProvider>
                 <ScrollRestoration />
                 <Scripts />
             </body>

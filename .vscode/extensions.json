@@ -1,0 +1,10 @@
+{
+    "recommendations": [
+        "vunguyentuan.vscode-css-variables",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "vunguyentuan.vscode-postcss",
+        "yoavbls.pretty-ts-errors",
+        "formulahendry.auto-rename-tag"
+    ]
+}

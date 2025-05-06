@@ -40,5 +40,13 @@
     "editor.codeActionsOnSave": {
         "source.removeUnusedImports": "explicit",
         "source.organizeImports": "explicit"
-    }
+    },
+
+    "cssVariables.lookupFiles": [
+        "**/*.css",
+        "**/*.scss",
+        "**/*.sass",
+        "**/*.less",
+        "node_modules/@mantine/core/styles.css"
+    ]
 }
